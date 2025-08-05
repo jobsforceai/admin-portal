@@ -1,21 +1,43 @@
 
 "use client";
 
-import { useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Toaster, toast } from "sonner";
-import { Counceller, PaginatedResponse } from "@/types";
-import { changeApplicationStatus, changeVerificationStatus } from "@/actions/superAdminActions";
+import { Agent, PaginatedResponse } from "@/types";
+import { superAdminApiRequest } from "@/lib/superAdminApi";
 
-interface CouncellersClientPageProps {
-  data: PaginatedResponse<Counceller>;
-}
-
-export default function CouncellersClientPage({ data }: CouncellersClientPageProps) {
+export default function AgentsClientPage() {
+  const [data, setData] = useState<PaginatedResponse<Agent> | null>(null);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [editingAgentId, setEditingAgentId] = useState<string | null>(null);
+  const [newEmail, setNewEmail] = useState("");
+
+  const page = searchParams.get("page") || "1";
+  const search = searchParams.get("search") || "";
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await superAdminApiRequest(`/agents?page=${page}&limit=10&search=${search}`);
+        if (!res.ok) {
+          throw new Error("Failed to fetch agents");
+        }
+        const agentsData = await res.json();
+        setData(agentsData);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error("An unknown error occurred");
+        }
+      }
+    };
+    fetchData();
+  }, [page, search]);
 
   const handleSearch = (term: string) => {
     const params = new URLSearchParams(searchParams);
@@ -25,20 +47,30 @@ export default function CouncellersClientPage({ data }: CouncellersClientPagePro
       params.delete("search");
     }
     params.set("page", "1");
-    router.replace(`/councellers?${params.toString()}`);
+    router.replace(`/superadmin/agents?${params.toString()}`);
   };
 
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams);
     params.set("page", newPage.toString());
-    router.push(`/councellers?${params.toString()}`);
+    router.push(`/superadmin/agents?${params.toString()}`);
   };
 
   const handleApplicationStatusChange = (id: string, status: string) => {
     startTransition(async () => {
       try {
-        await changeApplicationStatus(id, status);
+        const res = await superAdminApiRequest(`/agent/${id}/application-status`, {
+          method: "PATCH",
+          body: JSON.stringify({ applicationStatus: status }),
+        });
+        if (!res.ok) {
+          throw new Error("Failed to update status");
+        }
         toast.success("Application status updated successfully");
+        // Refetch data
+        const updatedRes = await superAdminApiRequest(`/agents?page=${page}&limit=10&search=${search}`);
+        const updatedData = await updatedRes.json();
+        setData(updatedData);
       } catch (error: unknown) {
         if (error instanceof Error) {
           toast.error(error.message);
@@ -52,8 +84,18 @@ export default function CouncellersClientPage({ data }: CouncellersClientPagePro
   const handleVerificationStatusChange = (id: string, isVerified: boolean) => {
     startTransition(async () => {
       try {
-        await changeVerificationStatus(id, isVerified);
+        const res = await superAdminApiRequest(`/agent/${id}/verification-status`, {
+          method: "PATCH",
+          body: JSON.stringify({ isVerified }),
+        });
+        if (!res.ok) {
+          throw new Error("Failed to update status");
+        }
         toast.success("Verification status updated successfully");
+        // Refetch data
+        const updatedRes = await superAdminApiRequest(`/agents?page=${page}&limit=10&search=${search}`);
+        const updatedData = await updatedRes.json();
+        setData(updatedData);
       } catch (error: unknown) {
         if (error instanceof Error) {
           toast.error(error.message);
@@ -64,10 +106,41 @@ export default function CouncellersClientPage({ data }: CouncellersClientPagePro
     });
   };
 
+  const handleEmailChange = (id: string) => {
+    startTransition(async () => {
+      try {
+        const res = await superAdminApiRequest(`/agent/${id}/email`, {
+          method: "PATCH",
+          body: JSON.stringify({ email: newEmail }),
+        });
+        if (!res.ok) {
+          const error = await res.json();
+          throw new Error(error.message || "Failed to update email");
+        }
+        toast.success("Email updated successfully");
+        setEditingAgentId(null);
+        // Refetch data
+        const updatedRes = await superAdminApiRequest(`/agents?page=${page}&limit=10&search=${search}`);
+        const updatedData = await updatedRes.json();
+        setData(updatedData);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error("An unknown error occurred");
+        }
+      }
+    });
+  };
+
+  if (!data) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="container mx-auto p-4 bg-white text-black">
       <Toaster richColors />
-      <h1 className="text-2xl font-bold mb-4 text-gray-800">Councellers</h1>
+      <h1 className="text-2xl font-bold mb-4 text-gray-800">Agents</h1>
       <div className="flex justify-between mb-4">
         <input
           type="text"
@@ -94,20 +167,31 @@ export default function CouncellersClientPage({ data }: CouncellersClientPagePro
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {data.data.map((counceller) => (
+            {data.data.map((agent) => (
               <motion.tr
-                key={counceller._id}
+                key={agent._id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
                 className={`${isPending ? "opacity-50" : ""} hover:bg-gray-50`}
               >
-                <td className="py-4 px-4 border-b border-gray-200 text-sm text-gray-900">{counceller.name}</td>
-                <td className="py-4 px-4 border-b border-gray-200 text-sm text-gray-700">{counceller.email}</td>
+                <td className="py-4 px-4 border-b border-gray-200 text-sm text-gray-900">{agent.name}</td>
+                <td className="py-4 px-4 border-b border-gray-200 text-sm text-gray-700">
+                  {editingAgentId === agent._id ? (
+                    <input
+                      type="email"
+                      defaultValue={agent.email}
+                      onChange={(e) => setNewEmail(e.target.value)}
+                      className="border p-2 rounded text-gray-900 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  ) : (
+                    agent.email
+                  )}
+                </td>
                 <td className="py-4 px-4 border-b border-gray-200">
                   <select
-                    value={counceller.applicationStatus}
-                    onChange={(e) => handleApplicationStatusChange(counceller._id, e.target.value)}
+                    value={agent.applicationStatus}
+                    onChange={(e) => handleApplicationStatusChange(agent._id, e.target.value)}
                     disabled={isPending}
                     className="border p-2 rounded bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
@@ -120,20 +204,40 @@ export default function CouncellersClientPage({ data }: CouncellersClientPagePro
                 <td className="py-4 px-4 border-b border-gray-200">
                   <span
                     className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      counceller.isVerified ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                      agent.isVerified ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                     }`}
                   >
-                    {counceller.isVerified ? "Verified" : "Not Verified"}
+                    {agent.isVerified ? "Verified" : "Not Verified"}
                   </span>
                 </td>
                 <td className="py-4 px-4 border-b border-gray-200">
                   <button
-                    onClick={() => handleVerificationStatusChange(counceller._id, !counceller.isVerified)}
+                    onClick={() => handleVerificationStatusChange(agent._id, !agent.isVerified)}
                     disabled={isPending}
                     className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400"
                   >
-                    {counceller.isVerified ? "Unverify" : "Verify"}
+                    {agent.isVerified ? "Unverify" : "Verify"}
                   </button>
+                  {editingAgentId === agent._id ? (
+                    <button
+                      onClick={() => handleEmailChange(agent._id)}
+                      disabled={isPending}
+                      className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-gray-400 ml-2"
+                    >
+                      Save
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setEditingAgentId(agent._id);
+                        setNewEmail(agent.email);
+                      }}
+                      disabled={isPending}
+                      className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:bg-gray-400 ml-2"
+                    >
+                      Edit Email
+                    </button>
+                  )}
                 </td>
               </motion.tr>
             ))}
