@@ -133,6 +133,27 @@ export default function AgentsClientPage() {
     });
   };
 
+  const handleAssignCouncillors = () => {
+    startTransition(async () => {
+      try {
+        const res = await superAdminApiRequest("/agents/assign-councillors", {
+          method: "POST",
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message || "Failed to assign councillors");
+        }
+        toast.success(data.message);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error("An unknown error occurred");
+        }
+      }
+    });
+  };
+
   if (!data) {
     return <div>Loading...</div>;
   }
@@ -149,6 +170,13 @@ export default function AgentsClientPage() {
           onChange={(e) => handleSearch(e.target.value)}
           className="border p-2 rounded text-gray-900 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+        <button
+          onClick={handleAssignCouncillors}
+          disabled={isPending}
+          className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:bg-gray-400"
+        >
+          Assign Councillors
+        </button>
       </div>
       <motion.div
         initial={{ opacity: 0 }}
