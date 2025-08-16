@@ -8,19 +8,23 @@ const getApiUrl = () => {
   return backendUrl;
 };
 
-export async function handleSuperAdminLogin(password: string): Promise<boolean> {
+export async function handleAdminLogin(email: string, password: string): Promise<boolean> {
   try {
-    const response = await fetch(`${getApiUrl()}/login`, {
+    const response = await fetch(`${getApiUrl()}/admin/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-superadmin-password": password,
       },
+      body: JSON.stringify({ email, password }),
     });
 
     if (response.ok) {
-      sessionStorage.setItem("superAdminPassword", password);
-      return true;
+      const data = await response.json();
+      if (data.token) {
+        sessionStorage.setItem("adminToken", data.token);
+        return true;
+      }
+      return false;
     } else {
       return false;
     }
@@ -30,22 +34,22 @@ export async function handleSuperAdminLogin(password: string): Promise<boolean> 
   }
 }
 
-export function handleSuperAdminLogout(): void {
-  sessionStorage.removeItem("superAdminPassword");
-  window.location.href = "/superadmin/login";
+export function handleAdminLogout(): void {
+  sessionStorage.removeItem("adminToken");
+  window.location.href = "/admin/login";
 }
 
-export async function superAdminApiRequest(path: string, opts: RequestInit = {}): Promise<Response> {
-  const password = sessionStorage.getItem("superAdminPassword");
+export async function adminApiRequest(path: string, opts: RequestInit = {}): Promise<Response> {
+  const token = sessionStorage.getItem("adminToken");
 
-  if (!password) {
-    window.location.href = "/superadmin/login";
+  if (!token) {
+    window.location.href = "/admin/login";
     // Return a promise that will never resolve
     return new Promise(() => {});
   }
 
   const headers = new Headers(opts.headers as HeadersInit);
-  headers.set("x-superadmin-password", password);
+  headers.set("Authorization", `Bearer ${token}`);
 
   const body = opts.body;
   const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
@@ -62,7 +66,7 @@ export async function superAdminApiRequest(path: string, opts: RequestInit = {})
   });
 
   if (response.status === 401 || response.status === 403) {
-    handleSuperAdminLogout();
+    handleAdminLogout();
   }
 
   return response;

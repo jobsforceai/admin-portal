@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { handleSuperAdminLogin } from "@/lib/superAdminApi";
+import { handleAdminLogin } from "@/lib/adminApi";
 import { useRouter } from "next/navigation";
 
-export default function SuperAdminLoginPage() {
+export default function AdminLoginPage() {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -15,21 +16,39 @@ export default function SuperAdminLoginPage() {
     setLoading(true);
     setError("");
 
-    const success = await handleSuperAdminLogin(password);
+    const success = await handleAdminLogin(email, password);
 
     setLoading(false);
     if (success) {
-      router.push("/superadmin/councellers");
+      router.push("/admin/councillors");
     } else {
-      setError("Invalid password.");
+      setError("Invalid email or password.");
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold text-center text-gray-900">Superadmin Login</h1>
+        <h1 className="text-2xl font-bold text-center text-gray-900">Admin Login</h1>
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label
+              htmlFor="email"
+              className="text-sm font-medium text-gray-700"
+            >
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="block w-full px-3 py-2 mt-1 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-md shadow-sm appearance-none focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+          </div>
           <div>
             <label
               htmlFor="password"
@@ -41,6 +60,7 @@ export default function SuperAdminLoginPage() {
               id="password"
               name="password"
               type="password"
+              autoComplete="current-password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}

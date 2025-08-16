@@ -3,12 +3,14 @@
 import { useState, useTransition } from "react";
 import { motion } from "framer-motion";
 import { Toaster, toast } from "sonner";
-import { createJob } from "@/actions/superAdminActions";
+import { createJob } from "@/actions/adminActions";
+import { useAdmin } from "@/hooks/useAdmin";
 
 type JobType = "Full-time" | "Part-time" | "Internship";
 type LocationType = "Remote" | "Hybrid" | "On-site";
 
 export default function CreateJobClientPage() {
+  const admin = useAdmin();
   const [isPending, startTransition] = useTransition();
 
   const [title, setTitle] = useState("");
@@ -39,8 +41,8 @@ export default function CreateJobClientPage() {
         whoCanApply,
       };
 
-      const password = sessionStorage.getItem("superAdminPassword");
-      const result = await createJob(jobData, password);
+      const token = sessionStorage.getItem("adminToken");
+      const result = await createJob(jobData, token);
 
       if (result.success) {
         toast.success(result.message);
@@ -60,6 +62,18 @@ export default function CreateJobClientPage() {
       }
     });
   };
+
+  if (!admin) {
+    return <div>Loading...</div>;
+  }
+
+  if (!admin.roles.includes("hiring_manager")) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-2xl text-red-500">Access Denied</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-4 bg-white text-black">
