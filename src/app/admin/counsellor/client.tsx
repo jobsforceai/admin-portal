@@ -165,11 +165,12 @@ export default function CounsellorsClientPage() {
           className="border p-2 rounded text-gray-900 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
+      {/* Table for medium and large screens */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="overflow-x-auto rounded-lg border border-gray-200"
+        className="hidden md:block overflow-x-auto rounded-lg border border-gray-200"
       >
         <table className="min-w-full bg-white">
           <thead className="bg-gray-50">
@@ -259,6 +260,82 @@ export default function CounsellorsClientPage() {
           </tbody>
         </table>
       </motion.div>
+
+      {/* Cards for small screens */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:hidden">
+        {data.data.map((counsellor) => (
+          <motion.div
+            key={counsellor._id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className={`bg-white p-4 rounded-lg shadow ${isPending ? "opacity-50" : ""}`}
+          >
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="text-lg font-bold text-gray-800">{counsellor.name}</h2>
+              <span
+                className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                  counsellor.isVerified ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                }`}
+              >
+                {counsellor.isVerified ? "Verified" : "Not Verified"}
+              </span>
+            </div>
+            {editingCouncellerId === counsellor._id ? (
+              <input
+                type="email"
+                defaultValue={counsellor.email}
+                onChange={(e) => setNewEmail(e.target.value)}
+                className="border p-2 rounded text-gray-900 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full mb-2"
+              />
+            ) : (
+              <p className="text-sm text-gray-600 mb-2">{counsellor.email}</p>
+            )}
+            <div className="mb-4">
+              <select
+                value={counsellor.applicationStatus}
+                onChange={(e) => handleApplicationStatusChange(counsellor._id, e.target.value)}
+                disabled={isPending}
+                className="border p-2 rounded bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+              >
+                <option value="applied">Applied</option>
+                <option value="interviewing">Interviewing</option>
+                <option value="hired">Hired</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => handleVerificationStatusChange(counsellor._id, !counsellor.isVerified)}
+                disabled={isPending}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md text-xs font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400"
+              >
+                {counsellor.isVerified ? "Unverify" : "Verify"}
+              </button>
+              {editingCouncellerId === counsellor._id ? (
+                <button
+                  onClick={() => handleEmailChange(counsellor._id)}
+                  disabled={isPending}
+                  className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md text-xs font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-gray-400"
+                >
+                  Save
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setEditingCouncellerId(counsellor._id);
+                    setNewEmail(counsellor.email);
+                  }}
+                  disabled={isPending}
+                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-md text-xs font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:bg-gray-400"
+                >
+                  Edit Email
+                </button>
+              )}
+            </div>
+          </motion.div>
+        ))}
+      </div>
       <div className="flex justify-between items-center mt-4">
         <button
           onClick={() => handlePageChange(data.pagination.page - 1)}
