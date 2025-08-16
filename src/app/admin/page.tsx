@@ -2,10 +2,10 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-export default function SuperAdminPage() {
+export default function AdminPage() {
   const router = useRouter();
   useEffect(() => {
-    router.replace("/superadmin/login");
+    router.replace("/admin/login");
   }, [router]);
   return null;
 }

@@ -6,16 +6,16 @@ const getApiUrl = () => {
   return backendUrl;
 };
 
-export async function superAdminApiRequestServer(path: string, password?: string | null, opts: RequestInit = {}): Promise<Response> {
-  if (!password) {
-    return new Response(JSON.stringify({ message: "Unauthorized: Missing password" }), {
+export async function adminApiRequestServer(path: string, token?: string | null, opts: RequestInit = {}): Promise<Response> {
+  if (!token) {
+    return new Response(JSON.stringify({ message: "Unauthorized: Missing token" }), {
       status: 401,
       headers: { 'Content-Type': 'application/json' },
     });
   }
 
   const headers = new Headers(opts.headers as HeadersInit);
-  headers.set("x-superadmin-password", password);
+  headers.set("Authorization", `Bearer ${token}`);
 
   const body = opts.body;
   const isFormData = typeof FormData !== "undefined" && body instanceof FormData;

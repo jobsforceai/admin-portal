@@ -1,15 +1,15 @@
 "use server";
 
-import { superAdminApiRequestServer } from "@/lib/superAdminApi.server";
+import { adminApiRequestServer } from "@/lib/adminApi.server";
 import { Job } from "@/types";
 import { revalidatePath } from "next/cache";
 
 export async function createJob(
   jobData: Omit<Job, "_id" | "createdAt" | "updatedAt">,
-  password?: string | null
+  token?: string | null
 ) {
   try {
-    const res = await superAdminApiRequestServer("/jobs", password, {
+    const res = await adminApiRequestServer("/jobs", token, {
       method: "POST",
       body: JSON.stringify(jobData),
     });
@@ -20,7 +20,7 @@ export async function createJob(
     }
 
     const data = await res.json();
-    revalidatePath("/superadmin/jobs"); // Assuming you'll have a jobs list page
+    revalidatePath("/admin/jobs");
     return { success: true, message: "Job created successfully", data };
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -30,9 +30,9 @@ export async function createJob(
   }
 }
 
-export async function getAllJobs(password?: string | null) {
+export async function getAllJobs(token?: string | null) {
   try {
-    const res = await superAdminApiRequestServer("/jobs", password);
+    const res = await adminApiRequestServer("/jobs", token);
 
     if (!res.ok) {
       const error = await res.json();
@@ -49,9 +49,9 @@ export async function getAllJobs(password?: string | null) {
   }
 }
 
-export async function getJobWithApplicants(jobId: string, password?: string | null) {
+export async function getJobWithApplicants(jobId: string, token?: string | null) {
   try {
-    const res = await superAdminApiRequestServer(`/jobs/${jobId}/applicants`, password);
+    const res = await adminApiRequestServer(`/jobs/${jobId}/applicants`, token);
 
     if (!res.ok) {
       const error = await res.json();

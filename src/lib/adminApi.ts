@@ -8,44 +8,50 @@ const getApiUrl = () => {
   return backendUrl;
 };
 
-export async function handleSuperAdminLogin(password: string): Promise<boolean> {
+export async function handleAdminLogin(email: string, password: string): Promise<string[] | null> {
   try {
     const response = await fetch(`${getApiUrl()}/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-superadmin-password": password,
       },
+      body: JSON.stringify({ email, password }),
     });
 
     if (response.ok) {
-      sessionStorage.setItem("superAdminPassword", password);
-      return true;
+      const data = await response.json();
+      if (data.data.token && data.data.roles) {
+        sessionStorage.setItem("adminToken", data.data.token);
+        sessionStorage.setItem("adminRoles", JSON.stringify(data.data.roles));
+        return data.data.roles;
+      }
+      return null;
     } else {
-      return false;
+      return null;
     }
   } catch (error) {
     console.error("An error occurred during login:", error);
-    return false;
+    return null;
   }
 }
 
-export function handleSuperAdminLogout(): void {
-  sessionStorage.removeItem("superAdminPassword");
-  window.location.href = "/superadmin/login";
+export function handleAdminLogout(): void {
+  sessionStorage.removeItem("adminToken");
+  sessionStorage.removeItem("adminRoles");
+  window.location.href = "/admin/login";
 }
 
-export async function superAdminApiRequest(path: string, opts: RequestInit = {}): Promise<Response> {
-  const password = sessionStorage.getItem("superAdminPassword");
+export async function adminApiRequest(path: string, opts: RequestInit = {}): Promise<Response> {
+  const token = sessionStorage.getItem("adminToken");
 
-  if (!password) {
-    window.location.href = "/superadmin/login";
+  if (!token) {
+    window.location.href = "/admin/login";
     // Return a promise that will never resolve
     return new Promise(() => {});
   }
 
   const headers = new Headers(opts.headers as HeadersInit);
-  headers.set("x-superadmin-password", password);
+  headers.set("Authorization", `Bearer ${token}`);
 
   const body = opts.body;
   const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
@@ -62,7 +68,7 @@ export async function superAdminApiRequest(path: string, opts: RequestInit = {})
   });
 
   if (response.status === 401 || response.status === 403) {
-    handleSuperAdminLogout();
+    handleAdminLogout();
   }
 
   return response;

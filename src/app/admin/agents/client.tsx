@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
@@ -6,9 +5,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Toaster, toast } from "sonner";
 import { Agent, PaginatedResponse } from "@/types";
-import { superAdminApiRequest } from "@/lib/superAdminApi";
+import { adminApiRequest } from "@/lib/adminApi";
+import { useAdmin } from "@/hooks/useAdmin";
 
 export default function AgentsClientPage() {
+  const admin = useAdmin();
   const [data, setData] = useState<PaginatedResponse<Agent> | null>(null);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
@@ -20,24 +21,26 @@ export default function AgentsClientPage() {
   const search = searchParams.get("search") || "";
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await superAdminApiRequest(`/agents?page=${page}&limit=10&search=${search}`);
-        if (!res.ok) {
-          throw new Error("Failed to fetch agents");
+    if (admin && admin.roles.includes("product_manager")) {
+      const fetchData = async () => {
+        try {
+          const res = await adminApiRequest(`/agents?page=${page}&limit=10&search=${search}`);
+          if (!res.ok) {
+            throw new Error("Failed to fetch agents");
+          }
+          const agentsData = await res.json();
+          setData(agentsData);
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            toast.error(error.message);
+          } else {
+            toast.error("An unknown error occurred");
+          }
         }
-        const agentsData = await res.json();
-        setData(agentsData);
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          toast.error(error.message);
-        } else {
-          toast.error("An unknown error occurred");
-        }
-      }
-    };
-    fetchData();
-  }, [page, search]);
+      };
+      fetchData();
+    }
+  }, [page, search, admin]);
 
   const handleSearch = (term: string) => {
     const params = new URLSearchParams(searchParams);
@@ -47,19 +50,19 @@ export default function AgentsClientPage() {
       params.delete("search");
     }
     params.set("page", "1");
-    router.replace(`/superadmin/agents?${params.toString()}`);
+    router.replace(`/admin/agents?${params.toString()}`);
   };
 
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams);
     params.set("page", newPage.toString());
-    router.push(`/superadmin/agents?${params.toString()}`);
+    router.push(`/admin/agents?${params.toString()}`);
   };
 
   const handleApplicationStatusChange = (id: string, status: string) => {
     startTransition(async () => {
       try {
-        const res = await superAdminApiRequest(`/agent/${id}/application-status`, {
+        const res = await adminApiRequest(`/agent/${id}/application-status`, {
           method: "PATCH",
           body: JSON.stringify({ applicationStatus: status }),
         });
@@ -68,7 +71,7 @@ export default function AgentsClientPage() {
         }
         toast.success("Application status updated successfully");
         // Refetch data
-        const updatedRes = await superAdminApiRequest(`/agents?page=${page}&limit=10&search=${search}`);
+        const updatedRes = await adminApiRequest(`/agents?page=${page}&limit=10&search=${search}`);
         const updatedData = await updatedRes.json();
         setData(updatedData);
       } catch (error: unknown) {
@@ -84,7 +87,7 @@ export default function AgentsClientPage() {
   const handleVerificationStatusChange = (id: string, isVerified: boolean) => {
     startTransition(async () => {
       try {
-        const res = await superAdminApiRequest(`/agent/${id}/verification-status`, {
+        const res = await adminApiRequest(`/agent/${id}/verification-status`, {
           method: "PATCH",
           body: JSON.stringify({ isVerified }),
         });
@@ -93,7 +96,7 @@ export default function AgentsClientPage() {
         }
         toast.success("Verification status updated successfully");
         // Refetch data
-        const updatedRes = await superAdminApiRequest(`/agents?page=${page}&limit=10&search=${search}`);
+        const updatedRes = await adminApiRequest(`/agents?page=${page}&limit=10&search=${search}`);
         const updatedData = await updatedRes.json();
         setData(updatedData);
       } catch (error: unknown) {
@@ -109,7 +112,7 @@ export default function AgentsClientPage() {
   const handleEmailChange = (id: string) => {
     startTransition(async () => {
       try {
-        const res = await superAdminApiRequest(`/agent/${id}/email`, {
+        const res = await adminApiRequest(`/agent/${id}/email`, {
           method: "PATCH",
           body: JSON.stringify({ email: newEmail }),
         });
@@ -120,7 +123,7 @@ export default function AgentsClientPage() {
         toast.success("Email updated successfully");
         setEditingAgentId(null);
         // Refetch data
-        const updatedRes = await superAdminApiRequest(`/agents?page=${page}&limit=10&search=${search}`);
+        const updatedRes = await adminApiRequest(`/agents?page=${page}&limit=10&search=${search}`);
         const updatedData = await updatedRes.json();
         setData(updatedData);
       } catch (error: unknown) {
@@ -133,15 +136,15 @@ export default function AgentsClientPage() {
     });
   };
 
-  const handleAssignCouncillors = () => {
+  const handleAssigncounsellor = () => {
     startTransition(async () => {
       try {
-        const res = await superAdminApiRequest("/agents/assign-councillors", {
+        const res = await adminApiRequest("/agents/assign-counsellor", {
           method: "POST",
         });
         const data = await res.json();
         if (!res.ok) {
-          throw new Error(data.message || "Failed to assign councillors");
+          throw new Error(data.message || "Failed to assign counsellor");
         }
         toast.success(data.message);
       } catch (error: unknown) {
@@ -153,6 +156,18 @@ export default function AgentsClientPage() {
       }
     });
   };
+
+  if (!admin) {
+    return <div>Loading...</div>;
+  }
+
+  if (!admin.roles.includes("product_manager")) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-2xl text-red-500">Access Denied</p>
+      </div>
+    );
+  }
 
   if (!data) {
     return <div>Loading...</div>;
@@ -171,11 +186,11 @@ export default function AgentsClientPage() {
           className="border p-2 rounded text-gray-900 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button
-          onClick={handleAssignCouncillors}
+          onClick={handleAssigncounsellor}
           disabled={isPending}
           className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:bg-gray-400"
         >
-          Assign Councillors
+          Assign counsellor
         </button>
       </div>
       <motion.div

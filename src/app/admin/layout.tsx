@@ -4,23 +4,22 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import LogoutButton from "@/components/LogoutButton";
+import { useAdmin } from "@/hooks/useAdmin";
 
-export default function SuperAdminLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const admin = useAdmin();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
-    const password = sessionStorage.getItem("superAdminPassword");
-    if (!password && pathname !== "/superadmin/login") {
-      router.replace("/superadmin/login");
-    } else {
-      setIsLoggedIn(true);
+    const token = sessionStorage.getItem("adminToken");
+    if (!token && pathname !== "/admin/login") {
+      router.replace("/admin/login");
     }
   }, [pathname, router]);
 
@@ -34,13 +33,21 @@ export default function SuperAdminLayout({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  if (!isLoggedIn && pathname !== "/superadmin/login") {
-    return null; // or a loading spinner
-  }
-
-  if (pathname === "/superadmin/login") {
+  if (pathname === "/admin/login") {
     return <>{children}</>;
   }
+
+  // Wait for the admin object to be populated before rendering the layout
+  if (!admin) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div>Loading...</div>
+      </div>
+    );
+  }
+
+  const hasProductManagerRole = admin.roles?.includes("product_manager");
+  const hasHiringManagerRole = admin.roles?.includes("hiring_manager");
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -58,29 +65,37 @@ export default function SuperAdminLayout({
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         } md:relative md:translate-x-0 transition-transform duration-300 ease-in-out z-30`}
       >
-        <div className="p-4 text-2xl font-bold">Super Admin</div>
+        <div className="p-4 text-2xl font-bold">Admin</div>
         <nav className="flex-1 p-2">
           <ul>
-            <li>
-              <Link href="/superadmin/councellers" className={`block p-2 rounded hover:bg-gray-700 ${pathname.includes('/councellers') ? 'bg-gray-900' : ''}`} onClick={() => setIsSidebarOpen(false)}>
-                Councellers
-              </Link>
-            </li>
-            <li>
-              <Link href="/superadmin/agents" className={`block p-2 rounded hover:bg-gray-700 ${pathname.includes('/agents') ? 'bg-gray-900' : ''}`} onClick={() => setIsSidebarOpen(false)}>
-                Agents
-              </Link>
-            </li>
-            <li>
-              <Link href="/superadmin/jobs/create" className={`block p-2 rounded hover:bg-gray-700 ${pathname.includes('/jobs/create') ? 'bg-gray-900' : ''}`} onClick={() => setIsSidebarOpen(false)}>
-                Create Job
-              </Link>
-            </li>
-            <li>
-              <Link href="/superadmin/jobs" className={`block p-2 rounded hover:bg-gray-700 ${pathname === '/superadmin/jobs' ? 'bg-gray-900' : ''}`} onClick={() => setIsSidebarOpen(false)}>
-                All Jobs
-              </Link>
-            </li>
+            {hasProductManagerRole && (
+              <>
+                <li>
+                  <Link href="/admin/counsellors" className={`block p-2 rounded hover:bg-gray-700 ${pathname.includes('/counsellors') ? 'bg-gray-900' : ''}`} onClick={() => setIsSidebarOpen(false)}>
+                    Counsellors
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/admin/agents" className={`block p-2 rounded hover:bg-gray-700 ${pathname.includes('/agents') ? 'bg-gray-900' : ''}`} onClick={() => setIsSidebarOpen(false)}>
+                    Agents
+                  </Link>
+                </li>
+              </>
+            )}
+            {hasHiringManagerRole && (
+              <>
+                <li>
+                  <Link href="/admin/jobs/create" className={`block p-2 rounded hover:bg-gray-700 ${pathname.includes('/jobs/create') ? 'bg-gray-900' : ''}`} onClick={() => setIsSidebarOpen(false)}>
+                    Create Job
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/admin/jobs" className={`block p-2 rounded hover:bg-gray-700 ${pathname === '/admin/jobs' ? 'bg-gray-900' : ''}`} onClick={() => setIsSidebarOpen(false)}>
+                    All Jobs
+                  </Link>
+                </li>
+              </>
+            )}
           </ul>
         </nav>
         <div className="p-4">
@@ -108,7 +123,7 @@ export default function SuperAdminLayout({
               ></path>
             </svg>
           </button>
-          <div className="text-xl font-bold ml-4">Super Admin</div>
+          <div className="text-xl font-bold ml-4">Admin</div>
         </header>
 
         <main className="flex-1 p-4 sm:p-6 overflow-y-auto">{children}</main>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getJobWithApplicants } from "@/actions/superAdminActions";
+import { getJobWithApplicants } from "@/actions/adminActions";
 import { Job, JobApplication } from "@/types";
 import { Toaster, toast } from "sonner";
 import FormattedJobDescription from "@/components/FormattedJobDescription";
@@ -28,8 +28,8 @@ export default function JobApplicantsClientPage({ jobId }: { jobId: string }) {
   useEffect(() => {
     const fetchJobData = async () => {
       setIsLoading(true);
-      const password = sessionStorage.getItem("superAdminPassword");
-      const result = await getJobWithApplicants(jobId, password);
+      const token = sessionStorage.getItem("adminToken");
+      const result = await getJobWithApplicants(jobId, token);
 
       if (result.success) {
         setJob(result.data.job);

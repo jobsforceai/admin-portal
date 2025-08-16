@@ -2,33 +2,47 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getAllJobs } from "@/actions/superAdminActions";
+import { getAllJobs } from "@/actions/adminActions";
 import { Job } from "@/types";
 import { Toaster, toast } from "sonner";
+import { useAdmin } from "@/hooks/useAdmin";
 
 export default function AllJobsClientPage() {
+  const admin = useAdmin();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchJobs = async () => {
-      setIsLoading(true);
-      const password = sessionStorage.getItem("superAdminPassword");
-      const result = await getAllJobs(password);
+    if (admin && admin.roles.includes("hiring_manager")) {
+      const fetchJobs = async () => {
+        setIsLoading(true);
+        const token = sessionStorage.getItem("adminToken");
+        const result = await getAllJobs(token);
 
-      if (result.success) {
-        setJobs(result.data.data);
-      } else {
-        toast.error(result.message);
-      }
+        if (result.success) {
+          setJobs(result.data.data);
+        } else {
+          toast.error(result.message);
+        }
+        setIsLoading(false);
+      };
+
+      fetchJobs();
+    } else if (admin) {
       setIsLoading(false);
-    };
+    }
+  }, [admin]);
 
-    fetchJobs();
-  }, []);
+  if (isLoading || !admin) {
+    return <div className="text-center mt-10">Loading...</div>;
+  }
 
-  if (isLoading) {
-    return <div className="text-center mt-10">Loading jobs...</div>;
+  if (!admin.roles.includes("hiring_manager")) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-2xl text-red-500">Access Denied</p>
+      </div>
+    );
   }
 
   return (
@@ -44,7 +58,7 @@ export default function AllJobsClientPage() {
               <p className="text-gray-700 mt-4">{job.description}</p>
               <div className="mt-4">
                 <Link
-                  href={`/superadmin/jobs/${job._id}/applicants`}
+                  href={`/admin/jobs/${job._id}/applicants`}
                   className="text-indigo-600 hover:text-indigo-800 font-medium"
                 >
                   View Applicants
