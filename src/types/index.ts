@@ -40,3 +40,17 @@ export interface Job {
   jobType: "Full-time" | "Part-time" | "Internship";
   whoCanApply: string;
 }
+
+export interface JobApplication {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  location: string;
+  resume: string;
+  jobId: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
