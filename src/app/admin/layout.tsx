@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import LogoutButton from "@/components/LogoutButton";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -65,7 +66,10 @@ export default function AdminLayout({
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         } md:relative md:translate-x-0 transition-transform duration-300 ease-in-out z-30`}
       >
-        <div className="p-4 text-2xl font-bold">Admin</div>
+        <div className="flex items-center p-4">
+          <Image src="/images/logo-3d.png" alt="Jobsforce Logo" width={40} height={40} />
+          <span className="ml-2 text-2xl font-bold">Jobsforce</span>
+        </div>
         <nav className="flex-1 p-2">
           <ul>
             {hasProductManagerRole && (
