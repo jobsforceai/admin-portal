@@ -75,7 +75,7 @@ export default function AdminLayout({
             {hasProductManagerRole && (
               <>
                 <li>
-                  <Link href="/admin/counsellors" className={`block p-2 rounded hover:bg-gray-700 ${pathname.includes('/counsellors') ? 'bg-gray-900' : ''}`} onClick={() => setIsSidebarOpen(false)}>
+                  <Link href="/admin/counsellor" className={`block p-2 rounded hover:bg-gray-700 ${pathname.includes('/counsellor') ? 'bg-gray-900' : ''}`} onClick={() => setIsSidebarOpen(false)}>
                     Counsellors
                   </Link>
                 </li>
