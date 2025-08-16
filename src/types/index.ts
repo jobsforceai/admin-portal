@@ -1,4 +1,3 @@
-
 export interface Counceller {
   _id: string;
   name: string;
@@ -26,4 +25,18 @@ export interface PaginatedResponse<T> {
     totalPages: number;
   };
   error?: string;
+}
+
+export interface Job {
+  _id: string;
+  title: string;
+  domain: string;
+  description: string;
+  detailedDescription: string;
+  skills: string[];
+  location: "Remote" | "Hybrid" | "On-site";
+  minPay?: number;
+  maxPay?: number;
+  jobType: "Full-time" | "Part-time" | "Internship";
+  whoCanApply: string;
 }
