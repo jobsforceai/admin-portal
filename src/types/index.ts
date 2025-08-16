@@ -1,4 +1,4 @@
-export interface Counceller {
+export interface Counsellor {
   _id: string;
   name: string;
   email: string;

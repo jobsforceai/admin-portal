@@ -8,9 +8,9 @@ const getApiUrl = () => {
   return backendUrl;
 };
 
-export async function handleAdminLogin(email: string, password: string): Promise<boolean> {
+export async function handleAdminLogin(email: string, password: string): Promise<string[] | null> {
   try {
-    const response = await fetch(`${getApiUrl()}/admin/login`, {
+    const response = await fetch(`${getApiUrl()}/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -20,22 +20,24 @@ export async function handleAdminLogin(email: string, password: string): Promise
 
     if (response.ok) {
       const data = await response.json();
-      if (data.token) {
-        sessionStorage.setItem("adminToken", data.token);
-        return true;
+      if (data.data.token && data.data.roles) {
+        sessionStorage.setItem("adminToken", data.data.token);
+        sessionStorage.setItem("adminRoles", JSON.stringify(data.data.roles));
+        return data.data.roles;
       }
-      return false;
+      return null;
     } else {
-      return false;
+      return null;
     }
   } catch (error) {
     console.error("An error occurred during login:", error);
-    return false;
+    return null;
   }
 }
 
 export function handleAdminLogout(): void {
   sessionStorage.removeItem("adminToken");
+  sessionStorage.removeItem("adminRoles");
   window.location.href = "/admin/login";
 }
 

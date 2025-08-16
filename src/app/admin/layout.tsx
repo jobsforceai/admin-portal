@@ -14,15 +14,12 @@ export default function AdminLayout({
   const router = useRouter();
   const pathname = usePathname();
   const admin = useAdmin();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     const token = sessionStorage.getItem("adminToken");
     if (!token && pathname !== "/admin/login") {
       router.replace("/admin/login");
-    } else {
-      setIsLoggedIn(true);
     }
   }, [pathname, router]);
 
@@ -36,16 +33,21 @@ export default function AdminLayout({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  if (!isLoggedIn && pathname !== "/admin/login") {
-    return null; // or a loading spinner
-  }
-
   if (pathname === "/admin/login") {
     return <>{children}</>;
   }
 
-  const hasProductManagerRole = admin?.roles.includes("product_manager");
-  const hasHiringManagerRole = admin?.roles.includes("hiring_manager");
+  // Wait for the admin object to be populated before rendering the layout
+  if (!admin) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div>Loading...</div>
+      </div>
+    );
+  }
+
+  const hasProductManagerRole = admin.roles?.includes("product_manager");
+  const hasHiringManagerRole = admin.roles?.includes("hiring_manager");
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -69,8 +71,8 @@ export default function AdminLayout({
             {hasProductManagerRole && (
               <>
                 <li>
-                  <Link href="/admin/councellers" className={`block p-2 rounded hover:bg-gray-700 ${pathname.includes('/councellers') ? 'bg-gray-900' : ''}`} onClick={() => setIsSidebarOpen(false)}>
-                    Councellers
+                  <Link href="/admin/counsellors" className={`block p-2 rounded hover:bg-gray-700 ${pathname.includes('/counsellors') ? 'bg-gray-900' : ''}`} onClick={() => setIsSidebarOpen(false)}>
+                    Counsellors
                   </Link>
                 </li>
                 <li>

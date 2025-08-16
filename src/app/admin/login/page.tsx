@@ -16,11 +16,18 @@ export default function AdminLoginPage() {
     setLoading(true);
     setError("");
 
-    const success = await handleAdminLogin(email, password);
+    const roles = await handleAdminLogin(email, password);
 
     setLoading(false);
-    if (success) {
-      router.push("/admin/councillors");
+    if (roles) {
+      if (roles.includes("product_manager")) {
+        router.push("/admin/counsellor");
+      } else if (roles.includes("hiring_manager")) {
+        router.push("/admin/jobs");
+      } else {
+        // Fallback for users with no specific role page
+        setError("You do not have access to any admin pages.");
+      }
     } else {
       setError("Invalid email or password.");
     }

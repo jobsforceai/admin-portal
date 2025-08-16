@@ -136,15 +136,15 @@ export default function AgentsClientPage() {
     });
   };
 
-  const handleAssignCouncillors = () => {
+  const handleAssigncounsellor = () => {
     startTransition(async () => {
       try {
-        const res = await adminApiRequest("/agents/assign-councillors", {
+        const res = await adminApiRequest("/agents/assign-counsellor", {
           method: "POST",
         });
         const data = await res.json();
         if (!res.ok) {
-          throw new Error(data.message || "Failed to assign councillors");
+          throw new Error(data.message || "Failed to assign counsellor");
         }
         toast.success(data.message);
       } catch (error: unknown) {
@@ -186,11 +186,11 @@ export default function AgentsClientPage() {
           className="border p-2 rounded text-gray-900 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button
-          onClick={handleAssignCouncillors}
+          onClick={handleAssigncounsellor}
           disabled={isPending}
           className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:bg-gray-400"
         >
-          Assign Councillors
+          Assign counsellor
         </button>
       </div>
       <motion.div
