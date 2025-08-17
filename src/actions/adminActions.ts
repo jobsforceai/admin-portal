@@ -68,3 +68,31 @@ export async function getJobWithApplicants(jobId: string, token?: string | null)
     return { success: false, message: "An unknown error occurred" };
   }
 }
+
+export async function deleteJob(jobId: string, token?: string | null) {
+  try {
+    const res = await adminApiRequestServer(`/jobs/${jobId}`, token, {
+      method: "DELETE",
+    });
+
+    let body;
+    try {
+      // Try to parse JSON, but don't fail if body is empty (e.g., 204 No Content)
+      body = await res.json();
+    } catch {
+      body = null;
+    }
+
+    if (!res.ok) {
+      return { success: false, message: body?.message || "Failed to delete job" };
+    }
+
+    revalidatePath("/orbit/jobs");
+    return { success: true, message: body?.message || "Job deleted successfully" };
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return { success: false, message: error.message };
+    }
+    return { success: false, message: "An unknown error occurred" };
+  }
+}
