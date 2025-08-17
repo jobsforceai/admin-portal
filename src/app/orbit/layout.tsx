@@ -7,7 +7,7 @@ import Link from "next/link";
 import LogoutButton from "@/components/LogoutButton";
 import { useAdmin } from "@/hooks/useAdmin";
 
-export default function AdminLayout({
+export default function OrbitLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -19,8 +19,8 @@ export default function AdminLayout({
 
   useEffect(() => {
     const token = sessionStorage.getItem("adminToken");
-    if (!token && pathname !== "/admin/login") {
-      router.replace("/admin/login");
+    if (!token && pathname !== "/orbit/login") {
+      router.replace("/orbit/login");
     }
   }, [pathname, router]);
 
@@ -34,7 +34,7 @@ export default function AdminLayout({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  if (pathname === "/admin/login") {
+  if (pathname === "/orbit/login") {
     return <>{children}</>;
   }
 
@@ -75,12 +75,12 @@ export default function AdminLayout({
             {hasProductManagerRole && (
               <>
                 <li>
-                  <Link href="/admin/counsellor" className={`block p-2 rounded hover:bg-gray-700 ${pathname.includes('/counsellor') ? 'bg-gray-900' : ''}`} onClick={() => setIsSidebarOpen(false)}>
+                  <Link href="/orbit/counsellor" className={`block p-2 rounded hover:bg-gray-700 ${pathname.includes('/counsellor') ? 'bg-gray-900' : ''}`} onClick={() => setIsSidebarOpen(false)}>
                     Counsellors
                   </Link>
                 </li>
                 <li>
-                  <Link href="/admin/agents" className={`block p-2 rounded hover:bg-gray-700 ${pathname.includes('/agents') ? 'bg-gray-900' : ''}`} onClick={() => setIsSidebarOpen(false)}>
+                  <Link href="/orbit/agents" className={`block p-2 rounded hover:bg-gray-700 ${pathname.includes('/agents') ? 'bg-gray-900' : ''}`} onClick={() => setIsSidebarOpen(false)}>
                     Agents
                   </Link>
                 </li>
@@ -89,12 +89,12 @@ export default function AdminLayout({
             {hasHiringManagerRole && (
               <>
                 <li>
-                  <Link href="/admin/jobs/create" className={`block p-2 rounded hover:bg-gray-700 ${pathname.includes('/jobs/create') ? 'bg-gray-900' : ''}`} onClick={() => setIsSidebarOpen(false)}>
+                  <Link href="/orbit/jobs/create" className={`block p-2 rounded hover:bg-gray-700 ${pathname.includes('/jobs/create') ? 'bg-gray-900' : ''}`} onClick={() => setIsSidebarOpen(false)}>
                     Create Job
                   </Link>
                 </li>
                 <li>
-                  <Link href="/admin/jobs" className={`block p-2 rounded hover:bg-gray-700 ${pathname === '/admin/jobs' ? 'bg-gray-900' : ''}`} onClick={() => setIsSidebarOpen(false)}>
+                  <Link href="/orbit/jobs" className={`block p-2 rounded hover:bg-gray-700 ${pathname === '/orbit/jobs' ? 'bg-gray-900' : ''}`} onClick={() => setIsSidebarOpen(false)}>
                     All Jobs
                   </Link>
                 </li>
@@ -127,7 +127,7 @@ export default function AdminLayout({
               ></path>
             </svg>
           </button>
-          <div className="text-xl font-bold ml-4">Admin</div>
+          <div className="text-xl font-bold ml-4">Orbit</div>
         </header>
 
         <main className="flex-1 p-4 sm:p-6 overflow-y-auto">{children}</main>

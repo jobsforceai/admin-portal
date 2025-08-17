@@ -58,7 +58,7 @@ export default function AllJobsClientPage() {
               <p className="text-gray-700 mt-4">{job.description}</p>
               <div className="mt-4">
                 <Link
-                  href={`/admin/jobs/${job._id}/applicants`}
+                  href={`/orbit/jobs/${job._id}/applicants`}
                   className="text-indigo-600 hover:text-indigo-800 font-medium"
                 >
                   View Applicants

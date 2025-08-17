@@ -4,7 +4,7 @@ import { useState } from "react";
 import { handleAdminLogin } from "@/lib/adminApi";
 import { useRouter } from "next/navigation";
 
-export default function AdminLoginPage() {
+export default function OrbitLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -21,12 +21,12 @@ export default function AdminLoginPage() {
     setLoading(false);
     if (roles) {
       if (roles.includes("product_manager")) {
-        router.push("/admin/counsellor");
+        router.push("/orbit/counsellor");
       } else if (roles.includes("hiring_manager")) {
-        router.push("/admin/jobs");
+        router.push("/orbit/jobs");
       } else {
         // Fallback for users with no specific role page
-        setError("You do not have access to any admin pages.");
+        setError("You do not have access to any orbit pages.");
       }
     } else {
       setError("Invalid email or password.");
@@ -36,7 +36,7 @@ export default function AdminLoginPage() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold text-center text-gray-900">Admin Login</h1>
+        <h1 className="text-2xl font-bold text-center text-gray-900">Jobsforce Orbit</h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label

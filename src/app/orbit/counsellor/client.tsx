@@ -50,13 +50,13 @@ export default function CounsellorsClientPage() {
       params.delete("search");
     }
     params.set("page", "1");
-    router.replace(`/admin/counsellors?${params.toString()}`);
+    router.replace(`/orbit/counsellors?${params.toString()}`);
   };
 
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams);
     params.set("page", newPage.toString());
-    router.push(`/admin/counsellors?${params.toString()}`);
+    router.push(`/orbit/counsellors?${params.toString()}`);
   };
 
   const handleApplicationStatusChange = (id: string, status: string) => {
