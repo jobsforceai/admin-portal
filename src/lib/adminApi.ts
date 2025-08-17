@@ -73,3 +73,7 @@ export async function adminApiRequest(path: string, opts: RequestInit = {}): Pro
 
   return response;
 }
+
+export async function adminApiDelete(path: string, opts: RequestInit = {}): Promise<Response> {
+  return adminApiRequest(path, { ...opts, method: "DELETE" });
+}
