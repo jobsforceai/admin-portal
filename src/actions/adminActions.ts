@@ -20,7 +20,7 @@ export async function createJob(
     }
 
     const data = await res.json();
-    revalidatePath("/admin/jobs");
+    revalidatePath("/orbit/jobs");
     return { success: true, message: "Job created successfully", data };
   } catch (error: unknown) {
     if (error instanceof Error) {

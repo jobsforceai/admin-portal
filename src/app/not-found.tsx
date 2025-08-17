@@ -5,7 +5,7 @@ import { useEffect } from "react";
 export default function NotFound() {
   const router = useRouter();
   useEffect(() => {
-    router.replace("/admin/login");
+    router.replace("/orbit/login");
   }, [router]);
   return null;
 }

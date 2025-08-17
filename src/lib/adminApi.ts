@@ -38,14 +38,14 @@ export async function handleAdminLogin(email: string, password: string): Promise
 export function handleAdminLogout(): void {
   sessionStorage.removeItem("adminToken");
   sessionStorage.removeItem("adminRoles");
-  window.location.href = "/admin/login";
+  window.location.href = "/orbit/login";
 }
 
 export async function adminApiRequest(path: string, opts: RequestInit = {}): Promise<Response> {
   const token = sessionStorage.getItem("adminToken");
 
   if (!token) {
-    window.location.href = "/admin/login";
+    window.location.href = "/orbit/login";
     // Return a promise that will never resolve
     return new Promise(() => {});
   }

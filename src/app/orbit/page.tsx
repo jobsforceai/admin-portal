@@ -2,10 +2,10 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-export default function AdminPage() {
+export default function OrbitPage() {
   const router = useRouter();
   useEffect(() => {
-    router.replace("/admin/login");
+    router.replace("/orbit/login");
   }, [router]);
   return null;
 }
