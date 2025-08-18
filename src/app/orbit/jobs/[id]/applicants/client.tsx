@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState, useTransition, useCallback } from "react";
-import { getJobWithApplicants, assignTestToApplicant } from "@/actions/adminActions";
-import { Job, JobApplication } from "@/types";
+import { getJobWithApplicants, assignTestToApplicant, getSubmission, gradeSubmission } from "@/actions/adminActions";
+import { Job, JobApplication, Submission, GradedAnswer } from "@/types";
 import { Toaster, toast } from "sonner";
 import { useAdmin } from "@/hooks/useAdmin";
+import SubmissionGradingModal from "@/components/SubmissionGradingModal";
 import {
   Briefcase,
   Clock,
@@ -14,12 +15,12 @@ import {
   Phone,
   FileText,
   CheckCircle,
+  Edit,
   Target,
   Users,
   Award,
 } from "lucide-react";
 import FormattedJobDescription from "@/components/FormattedJobDescription";
-import SubmissionGradingModal from "@/components/SubmissionGradingModal";
 
 type JobWithApplicants = Job & {
   applicants: JobApplication[];
@@ -31,10 +32,8 @@ export default function ApplicantsClientPage({ jobId }: { jobId: string }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isAssigningTest, startTestAssignmentTransition] = useTransition();
   const [assigningTestId, setAssigningTestId] = useState<string | null>(null);
-  const [isGradingModalOpen, setIsGradingModalOpen] = useState(false);
-  const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(
-    null
-  );
+  const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
+  const [isGrading, startGradingTransition] = useTransition();
 
   const fetchJobWithApplicants = useCallback(async () => {
     setIsLoading(true);
@@ -69,18 +68,7 @@ export default function ApplicantsClientPage({ jobId }: { jobId: string }) {
 
       if (result.success) {
         toast.success(result.message);
-        // Update the UI to reflect the change
-        setJob((prevJob) => {
-          if (!prevJob) return null;
-          return {
-            ...prevJob,
-            applicants: prevJob.applicants.map((app) =>
-              app._id === applicationId
-                ? { ...app, isTestAssigned: true, applicationStatus: "shortlisted" }
-                : app
-            ),
-          };
-        });
+        fetchJobWithApplicants(); // Refresh data
       } else {
         toast.error(result.message);
       }
@@ -88,18 +76,31 @@ export default function ApplicantsClientPage({ jobId }: { jobId: string }) {
     });
   };
 
-  const handleOpenGradingModal = (applicationId: string) => {
-    setSelectedApplicationId(applicationId);
-    setIsGradingModalOpen(true);
+  const handleViewSubmission = async (applicationId: string) => {
+    const token = sessionStorage.getItem("adminToken");
+    const result = await getSubmission(applicationId, token);
+    if (result.success && result.data) {
+      setSelectedSubmission(result.data);
+    } else {
+      toast.error(result.message || "Failed to fetch submission.");
+    }
   };
 
-  const handleCloseGradingModal = () => {
-    setSelectedApplicationId(null);
-    setIsGradingModalOpen(false);
-  };
+  const handleGradeSubmit = async (gradingData: { gradedAnswers: GradedAnswer[]; graderNotes?: string }) => {
+    if (!selectedSubmission) return;
 
-  const handleGraded = () => {
-    fetchJobWithApplicants();
+    startGradingTransition(async () => {
+      const token = sessionStorage.getItem("adminToken");
+      const result = await gradeSubmission(selectedSubmission.applicationId, gradingData, token);
+
+      if (result.success) {
+        toast.success(result.message);
+        setSelectedSubmission(null);
+        fetchJobWithApplicants(); // Refresh data
+      } else {
+        toast.error(result.message);
+      }
+    });
   };
 
   if (isLoading || !admin) {
@@ -248,10 +249,7 @@ export default function ApplicantsClientPage({ jobId }: { jobId: string }) {
           {job.applicants && job.applicants.length > 0 ? (
             <div className="space-y-4">
               {job.applicants.map((application) => (
-                <div
-                  key={application._id}
-                  className="bg-white p-4 rounded-lg shadow-md border border-gray-200 flex flex-col md:flex-row md:items-center md:justify-between"
-                >
+                <div key={application._id} className="bg-white p-4 rounded-lg shadow-md border border-gray-200 flex flex-col md:flex-row md:items-center md:justify-between">
                   <div className="flex-grow">
                     <h3 className="text-lg font-semibold text-gray-900">{`${application.firstName} ${application.lastName}`}</h3>
                     <div className="flex items-center text-gray-600 mt-2 text-sm">
@@ -262,16 +260,14 @@ export default function ApplicantsClientPage({ jobId }: { jobId: string }) {
                       <span>{application.phone}</span>
                     </div>
                     <div className="mt-2 text-sm">
-                      <span
-                        className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          application.applicationStatus === "shortlisted"
-                            ? "bg-green-100 text-green-800"
-                            : application.applicationStatus === "graded"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-gray-100 text-gray-800"
-                        }`}
-                      >
-                        {application.applicationStatus || "applied"}
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                        application.applicationStatus === "shortlisted"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : application.applicationStatus === "graded"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-gray-100 text-gray-800"
+                      }`}>
+                        {application.applicationStatus || 'applied'}
                       </span>
                     </div>
                   </div>
@@ -287,17 +283,20 @@ export default function ApplicantsClientPage({ jobId }: { jobId: string }) {
                         View Resume
                       </a>
                     )}
+                    
                     {application.isTestAssigned && (
                       <button
-                        onClick={() => handleOpenGradingModal(application._id)}
-                        className="bg-green-600 text-white px-3 py-1.5 rounded-md hover:bg-green-700 flex items-center text-sm"
+                        onClick={() => handleViewSubmission(application._id)}
+                        className="text-purple-600 hover:text-purple-800 font-medium flex items-center text-sm"
                       >
+                        <Edit size={16} className="mr-1" />
                         View Submission
                       </button>
                     )}
+
                     <button
                       onClick={() => handleAssignTest(application._id)}
-                      disabled={application.isTestAssigned || isAssigningTest}
+                      disabled={isAssigningTest || application.isTestAssigned}
                       className="bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center text-sm"
                     >
                       {application.isTestAssigned ? (
@@ -305,11 +304,8 @@ export default function ApplicantsClientPage({ jobId }: { jobId: string }) {
                           <CheckCircle size={16} className="mr-1" />
                           Test Assigned
                         </>
-                      ) : isAssigningTest &&
-                        assigningTestId === application._id ? (
-                        "Shortlisting..."
                       ) : (
-                        "Shortlist for Test"
+                        isAssigningTest && assigningTestId === application._id ? "Shortlisting..." : "Shortlist for Test"
                       )}
                     </button>
                   </div>
@@ -317,18 +313,17 @@ export default function ApplicantsClientPage({ jobId }: { jobId: string }) {
               ))}
             </div>
           ) : (
-            <p className="text-center text-gray-500">
-              No applicants found for this job.
-            </p>
+            <p className="text-center text-gray-500">No applicants found for this job.</p>
           )}
         </div>
       </div>
-      {isGradingModalOpen && selectedApplicationId && (
+
+      {selectedSubmission && (
         <SubmissionGradingModal
-          applicationId={selectedApplicationId}
-          isOpen={isGradingModalOpen}
-          onClose={handleCloseGradingModal}
-          onGraded={handleGraded}
+          submission={selectedSubmission}
+          onClose={() => setSelectedSubmission(null)}
+          onSubmit={handleGradeSubmit}
+          isGrading={isGrading}
         />
       )}
     </div>
