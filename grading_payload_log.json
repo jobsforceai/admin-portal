@@ -1,0 +1,50 @@
+{
+  "gradedAnswers": [
+    {
+      "questionId": "Q1",
+      "manualScore": 2,
+      "notes": "nice"
+    },
+    {
+      "questionId": "S1",
+      "manualScore": 0.5,
+      "notes": "nice"
+    },
+    {
+      "questionId": "P1",
+      "manualScore": 4,
+      "notes": "nice"
+    },
+    {
+      "questionId": "RP1",
+      "manualScore": 0,
+      "notes": "nice"
+    }
+  ],
+  "graderNotes": "nice"
+}
+{
+  "gradedAnswers": [
+    {
+      "questionId": "Q1",
+      "manualScore": 2,
+      "notes": "nice"
+    },
+    {
+      "questionId": "S1",
+      "manualScore": 0,
+      "notes": "nice"
+    },
+    {
+      "questionId": "P1",
+      "manualScore": 4,
+      "notes": "nice"
+    },
+    {
+      "questionId": "RP1",
+      "manualScore": 0,
+      "notes": "nice"
+    }
+  ],
+  "graderNotes": "nice"
+}

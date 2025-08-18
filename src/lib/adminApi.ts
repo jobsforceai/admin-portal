@@ -77,3 +77,13 @@ export async function adminApiRequest(path: string, opts: RequestInit = {}): Pro
 export async function adminApiDelete(path: string, opts: RequestInit = {}): Promise<Response> {
   return adminApiRequest(path, { ...opts, method: "DELETE" });
 }
+
+import { Assignment, GradingData } from "@/types";
+
+export async function adminApiPost(path: string, body: Assignment | GradingData, opts: RequestInit = {}): Promise<Response> {
+  return adminApiRequest(path, {
+    ...opts,
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}

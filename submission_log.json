@@ -1,0 +1,138 @@
+{
+  "success": true,
+  "message": "Submission retrieved successfully.",
+  "data": {
+    "_id": "68a30bd31665faa459437311",
+    "assignmentId": {
+      "_id": "68a2dc620566dc6ffa5fc0ff",
+      "title": "SDE Role Test Quiz",
+      "sections": [
+        {
+          "title": "Multiple Choice",
+          "type": "multiple-choice",
+          "pointsPerQuestion": 2,
+          "questions": [
+            {
+              "id": "Q1",
+              "prompt": "Which of the following has O(1) average time complexity for insertion and lookup?",
+              "options": [
+                {
+                  "key": "A",
+                  "text": "Array",
+                  "_id": "68a2dc620566dc6ffa5fc102"
+                },
+                {
+                  "key": "B",
+                  "text": "Linked List",
+                  "_id": "68a2dc620566dc6ffa5fc103"
+                },
+                {
+                  "key": "C",
+                  "text": "HashMap",
+                  "_id": "68a2dc620566dc6ffa5fc104"
+                },
+                {
+                  "key": "D",
+                  "text": "Binary Search Tree",
+                  "_id": "68a2dc620566dc6ffa5fc105"
+                }
+              ],
+              "correctAnswer": "C",
+              "_id": "68a2dc620566dc6ffa5fc101"
+            }
+          ],
+          "_id": "68a2dc620566dc6ffa5fc100"
+        },
+        {
+          "title": "Short Answer",
+          "type": "short-answer",
+          "pointsPerQuestion": 3,
+          "questions": [
+            {
+              "id": "S1",
+              "prompt": "What is the difference between an abstract class and an interface in Java?",
+              "modelAnswer": "Abstract classes can have both abstract and concrete methods; interfaces only have abstract methods (Java 7) or default methods (Java 8+). A class can extend one abstract class but implement multiple interfaces.",
+              "_id": "68a2dc620566dc6ffa5fc107",
+              "options": []
+            }
+          ],
+          "_id": "68a2dc620566dc6ffa5fc106"
+        },
+        {
+          "title": "Practical",
+          "type": "practical",
+          "pointsPerQuestion": 4,
+          "questions": [
+            {
+              "id": "P1",
+              "prompt": "Write a function in JavaScript to reverse a string without using built-in reverse().",
+              "modelAnswer": "function reverseString(str) { let result = ''; for (let i = str.length - 1; i >= 0; i--) { result += str[i]; } return result; }",
+              "_id": "68a2dc620566dc6ffa5fc109",
+              "options": []
+            }
+          ],
+          "_id": "68a2dc620566dc6ffa5fc108"
+        },
+        {
+          "title": "Roleplay",
+          "type": "roleplay",
+          "pointsPerQuestion": 20,
+          "questions": [
+            {
+              "id": "RP1",
+              "prompt": "You are explaining your project in a technical interview. The interviewer asks you to explain the system design of a URL shortener. How do you approach this?",
+              "modelAnswer": "Start with high-level design (API, database, hashing), cover scalability (sharding, load balancer), storage choice (NoSQL/SQL), and mention handling collisions + analytics.",
+              "_id": "68a2dc620566dc6ffa5fc10b",
+              "options": []
+            }
+          ],
+          "_id": "68a2dc620566dc6ffa5fc10a"
+        }
+      ]
+    },
+    "applicationId": "68a3028755534d5dcf6ea71f",
+    "applicantEmail": "abhinayr@valuefy.com",
+    "answers": [
+      {
+        "questionId": "Q1",
+        "answer": "C",
+        "_id": "68a30bd31665faa459437312",
+        "manualScore": 2,
+        "notes": "nice"
+      },
+      {
+        "questionId": "S1",
+        "answer": "An abstract class in Java is like a partially implemented blueprint: it can have abstract methods (without a body) as well as fully implemented methods. You can also create objects directly from an abstract class, which makes it useful when you want both shared behavior and some unimplemented parts.\n\nAn interface, on the other hand, is only a collection of abstract methods — it cannot contain any implemented methods at all. A class can only implement one interface, while it can extend multiple abstract classes.",
+        "_id": "68a30bd31665faa459437313",
+        "aiJustification": "The candidate correctly notes abstract classes can have both abstract and concrete methods but fundamentally errs by stating they can be directly instantiated. Major inaccuracies also include reversing the rules for implementing multiple interfaces versus extending abstract classes, and providing an outdated understanding of interface method types. These critical errors demonstrate significant gaps in core Java OOP knowledge.",
+        "aiSuggestedScore": 0.5,
+        "manualScore": 0,
+        "notes": "nice"
+      },
+      {
+        "questionId": "P1",
+        "answer": "function reverseString(str) {\n  let reversed = \"\";\n  for (let i = str.length - 1; i >= 0; i--) {\n    reversed += str[i];\n  }\n  return reversed;\n}\n\n// Example usage:\nconsole.log(reverseString(\"Jobsforce\")); // \"ecrofSboj\"",
+        "_id": "68a30bd31665faa459437314",
+        "aiJustification": "The candidate provided a perfectly functional and correct solution that adheres to the prompt's constraints. The code is clean, readable, and includes a helpful example demonstrating its usage.",
+        "aiSuggestedScore": 4,
+        "manualScore": 4,
+        "notes": "nice"
+      },
+      {
+        "questionId": "RP1",
+        "answer": "1) Clarify scope & requirements\n\nCore\n\nCreate short URL → Redirect to long URL (low latency, p99 < 50–100ms).\n\nHigh read:write (≈10:1 or more). Global availability.\n\nCustom alias support (optional), link expiry (TTL), basic analytics (click count, last accessed).\n\nNon-functional\n\nHigh availability, eventual consistency OK for analytics.\n\nHorizontal scalability, cost-efficient.\n\nAnti-abuse (rate limits, domain allow/deny lists, bot filtering).",
+        "_id": "68a30bd31665faa459437315",
+        "manualScore": 0,
+        "notes": "nice"
+      }
+    ],
+    "autoScore": 2,
+    "manualScore": 6,
+    "totalScore": 8,
+    "status": "graded",
+    "createdAt": "2025-08-18T11:17:39.624Z",
+    "updatedAt": "2025-08-18T12:34:08.665Z",
+    "__v": 0,
+    "graderNotes": "nice"
+  }
+}
