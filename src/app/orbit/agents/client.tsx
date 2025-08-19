@@ -139,7 +139,7 @@ export default function AgentsClientPage() {
   const handleAssigncounsellor = () => {
     startTransition(async () => {
       try {
-        const res = await adminApiRequest("/agents/assign-counsellor", {
+        const res = await adminApiRequest("/agents/assign-counsellors", {
           method: "POST",
         });
         const data = await res.json();
